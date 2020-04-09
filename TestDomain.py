@@ -26,7 +26,7 @@ print("starting tests\n")
 
 # print("length {} at angle {}".format(path[0],path[1]))
 print ("Creating World\n")
-world = vr.World(0,0,300,300,[gd.Node(200,200)])
+world = vr.World(0,0,100,100)
 world.drone.x = 1
 world.drone.y = 1
 world.print()
@@ -52,11 +52,16 @@ world.print()
 # while(world.checkPaths()):
 #     world.updateGraph()
 
-world.obs.append(vr.Block(50,50,50,150,False))
-world.obs.append(vr.Block(200,150,50,100,False))
-for i in range(10):
-    if(world.quadTree()):
+world.obs.append(vr.Block(16,16,20,40,False))
+#world.obs.append(vr.Block(200,150,50,100,False))
+# for i in range():
+#     if(not world.quadTree()):
+#         break
+while(1):
+    if(not world.quadTree()):
         break
+# world.quadTree()
+# world.quadTree()
 
 # print("printing results\n")
 # world.print()
@@ -67,7 +72,7 @@ for i in range(10):
 #     world.combine()
 #     done = True
 #     for i in world.blocks:
-#         if(((i.width*i.height)/(world.width*world.height))<0.01 and i.flyable):
+#         if(((i.width*i.height)/(world.width*world.height))<0.01 and i.partial):
 #             done = False
 # while(world.checkPaths()):
 #     world.updateGraph()
@@ -89,24 +94,25 @@ for i in range(10):
 
 fig2 = plt.figure()
 ax2 = fig2.add_subplot(111, aspect='equal')
-ax2.margins(x=300,y=300)
-for i in world.blocks:
-    ax2.add_patch(
-        patches.Rectangle(
-            (i.x, i.y),
-            i.width,
-            i.height,
-            fill=False if (i.flyable) else True      # remove background
-        ) ) 
-
+ax2.margins(x=100,y=100)
 for i in world.obs:
     ax2.add_patch(
         patches.Rectangle(
             (i.x, i.y),
             i.width,
             i.height,
-            fill=False if (i.flyable) else True      # remove background
-        ) ) 
+            fill=True      # remove background
+        ) )
+for i in world.blocks:
+    ax2.add_patch(
+        patches.Rectangle(
+            (i.x, i.y),
+            i.width,
+            i.height,
+            fill=False     # remove background
+        ) )
+
+
 fig2.savefig('rect2.png', dpi=90, bbox_inches='tight')
 
 plt.show()

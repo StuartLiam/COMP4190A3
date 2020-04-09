@@ -2,7 +2,7 @@ import GraphDomain as gd
 
 #the following 2 functions where taken from https://stackoverflow.com/questions/3838329/how-can-i-check-if-two-segments-intersect
 #by user Grumdrig
-#and subsequently added to to provide aditional functionality
+#and subsequently greatly added to to provide aditional functionality
 
 def ccw(A,B,C):
     return (C.y-A.y) * (B.x-A.x) > (B.y-A.y) * (C.x-A.x)
@@ -21,7 +21,7 @@ def intersect(A,B,C,D):
     b2 = C.y - (C.x*s2)
 
     if ((C.y == s1*C.x + b1) or (D.y == s1*D.x + b1)  or (A.y == s2*A.x + b2) or (B.y == s2*B.x + b2)):
-        print("on line")
+        #print("on line")
         return False
     
     return (ccw(A,C,D) != ccw(B,C,D) and ccw(A,B,C) != ccw(A,B,D)) #or (C.y == s1*C.x + b1) or (D.y == s1*D.x + b1)  or (A.y == s2*A.x + b2) or (B.y == s2*B.x + b2)
