@@ -174,6 +174,38 @@ class World(Rectangle):
                 break
         return foundOne
 
+    def createObstacles(self, onum, minVal, maxVal):
+        self.obs = []
+        while( len(self.obs) < onum ):
+            x = random.uniform(0.0, self.width)
+            y = random.uniform(0.0, self.height)
+            w = random.randrange(minVal, maxVal, 1)
+            h = random.randrange(minVal, maxVal, 1)
+            #w = random.uniform(0.1, owidth)
+            #h = random.uniform(0.1, oheight)
+            if ( x + w ) > self.width:
+                w = self.width - x
+            if ( y + h ) > self.height:
+                h = self.height - y
+            buildObs = Block(x,y, w, h, True)
+            found = False
+            for o in self.obs:
+                obsLines = buildObs.getLines()
+                listLines = o.getLines()
+                for k in obsLines:
+                    for l in listLines:
+                        if ((lh.intersect(k[0],k[1],l[0],l[1]))):
+                            found = True
+                            break
+                if(
+                    (buildObs.inside(o.x,o.y) or
+                    buildObs.inside(o.x,o.y+o.height) or
+                    buildObs.inside(o.x+o.width,o.y) or
+                    buildObs.inside(o.x+o.width,o.y+o.height))):
+                    found = True
+                    break
+            if ( not found ):
+                self.obs = self.obs + [buildObs]
 
 
 
