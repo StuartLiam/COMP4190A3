@@ -52,7 +52,7 @@ world.print()
 # while(world.checkPaths()):
 #     world.updateGraph()
 
-world.createObstacles(5,10,50)
+world.createObstacles(40,5,10)
 #world.obs.append(vr.Block(200,150,50,100,False))
 # for i in range():
 #     if(not world.quadTree()):

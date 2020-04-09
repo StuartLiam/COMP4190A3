@@ -36,7 +36,7 @@ class Block(Rectangle):
         super().__init__( x, y, width, height)
 
         self.flyable = flyable
-        self.node = gd.Node(x+(width//2),y+(height//2),self)
+        self.node = gd.Node(x+(width/2),y+(height/2),self)
     def inside(self,x,y):
         return True if (self.x < x and self.x + self.width > x and self.y < y and self.y + self.height > y ) else False
     def fullInside(self,x,y):
@@ -68,20 +68,18 @@ class World(Rectangle):
         self.currentGoal = goals[0] if (goals != None) else None
 
 
-    def split(self, x, y, dir, flyOne, flyTwo):
+    def split(self, x, y, dir):
         
         for i in self.blocks:
             if (i.inside(x,y)):
                 if dir == VERITCAL:
-                    self.blocks.append(Block(x , i.y , ((i.x + i.width)-x) , i.height, flyTwo) )
+                    self.blocks.append(Block(x , i.y , ((i.x + i.width)-x) , i.height,True))
                     i.width = x - i.x
-                    i.node.x = i.x + (i.width//2)
-                    i.flyable = flyOne
+                    i.node.x = i.x + (i.width/2)
                 if dir == HORIZONTAL:
-                    self.blocks.append(Block( i.x , y , i.width , ((i.y + i.height)-y), flyTwo) )
+                    self.blocks.append(Block( i.x , y , i.width , ((i.y + i.height)-y),True))
                     i.height = y - i.y
-                    i.node.y = i.y + (i.height//2)
-                    i.flyable = flyOne
+                    i.node.y = i.y + (i.height/2)
             
 
     def updateGraph(self):
@@ -101,34 +99,6 @@ class World(Rectangle):
                     self.graph.edges.append(gd.Edge(i.node,j.node))
             
             self.graph.nodes.append(i.node)#TODO check valid change from i
-
-    def checkPaths(self):
-        FoundOne = False
-        for i in self.graph.edges:
-            for j in self.blocks:
-                lines = j.getLines()
-                for k in lines:
-                    if((lh.intersect(i.nodeOne,i.nodeTwo,k[0],k[1])) and j.flyable == False):
-                        #print("Crosses a bad block")
-                        FoundOne = True
-                        areaOne = i.nodeOne.parent.width*i.nodeOne.parent.height
-                        areaTwo = i.nodeTwo.parent.width*i.nodeTwo.parent.height
-                        
-                        #s = 0 if (i.nodeTwo.x==i.nodeOne.x) else (i.nodeTwo.y-i.nodeOne.y)/(i.nodeTwo.x-i.nodeOne.x)
-
-                        if (areaOne >= areaTwo):
-                            if(i.nodeOne.parent.width >= i.nodeOne.parent.height):
-                                self.split(i.nodeOne.x, i.nodeOne.y,VERITCAL,True,True)
-                            if(i.nodeOne.parent.width < i.nodeOne.parent.height):
-                                self.split(i.nodeOne.x, i.nodeOne.y,HORIZONTAL,True,True)
-
-                        if (areaTwo >= areaOne):
-                            if(i.nodeTwo.parent.width >= i.nodeTwo.parent.height):
-                                self.split(i.nodeTwo.x, i.nodeTwo.y,VERITCAL,True,True)
-                            if(i.nodeTwo.parent.width < i.nodeTwo.parent.height):
-                                self.split(i.nodeTwo.x, i.nodeTwo.y,HORIZONTAL,True,True)
-        return FoundOne
-    
     
 
     def combine(self):
@@ -156,22 +126,25 @@ class World(Rectangle):
                 jLines = j.getLines()
                 for k in iLines:
                     for l in jLines:
-                        if ((lh.intersect(k[0],k[1],l[0],l[1])) and (i.width > 4 or i.height >4)):
+                        if ((lh.intersect(k[0],k[1],l[0],l[1])) and (i.width > 2 or i.height > 2)):
                             foundOne = True
-                            #hold =1
+                            break
+                    if(foundOne):
+                        break
                 if(
                     (i.inside(j.x,j.y) or
                     i.inside(j.x,j.y+j.height) or
                     i.inside(j.x+j.width,j.y) or
-                    i.inside(j.x+j.width,j.y+j.height)) and (i.width > 4 or i.height >4)):
+                    i.inside(j.x+j.width,j.y+j.height)) and (i.width > 2 or i.height > 2)):
                     foundOne = True
             if(foundOne):
                 if(i.width >= i.height):
-                    self.split(i.node.x, i.node.y,VERITCAL,True,True)
-                if(i.width < i.height):
-                    self.split(i.node.x, i.node.y,HORIZONTAL,True,True)
-                self.updateGraph()
+                    self.split(i.node.x, i.node.y,VERITCAL)
+                else:
+                    self.split(i.node.x, i.node.y,HORIZONTAL)
+                
                 break
+        self.updateGraph()
         return foundOne
 
     def createObstacles(self, onum, minVal, maxVal):
@@ -198,10 +171,18 @@ class World(Rectangle):
                             found = True
                             break
                 if(
-                    (buildObs.inside(o.x,o.y) or
-                    buildObs.inside(o.x,o.y+o.height) or
-                    buildObs.inside(o.x+o.width,o.y) or
-                    buildObs.inside(o.x+o.width,o.y+o.height))):
+                    (
+                        buildObs.inside(o.x,o.y) or
+                        buildObs.inside(o.x,o.y+o.height) or
+                        buildObs.inside(o.x+o.width,o.y) or
+                        buildObs.inside(o.x+o.width,o.y+o.height) or
+                        o.inside(buildObs.x,buildObs.y) or
+                        o.inside(buildObs.x,buildObs.y+buildObs.height) or
+                        o.inside(buildObs.x+buildObs.width,buildObs.y) or
+                        o.inside(buildObs.x+buildObs.width,buildObs.y+buildObs.height)
+                    )
+                    
+                    ):
                     found = True
                     break
             if ( not found ):
