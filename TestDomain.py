@@ -31,8 +31,8 @@ world.drone.x = 1
 world.drone.y = 1
 world.print()
 
-print("adding in a line at 5,5  10,5")
-world.createWallBlock(gd.Node(50,150),gd.Node(150,150))
+#print("adding in a line at 5,5  10,5")
+#world.createWallBlock(gd.Node(50,150),gd.Node(150,150))
 
 # print("updating the graph for the split\n")
 # world.updateGraph()
@@ -42,9 +42,9 @@ world.createWallBlock(gd.Node(50,150),gd.Node(150,150))
 #     world.updateGraph()
 
 # print("adding in a line at 20,20  20,10")
-world.createWallBlock(gd.Node(150,50),gd.Node(150,200))
+#world.createWallBlock(gd.Node(150,50),gd.Node(150,200))
 
-world.createWallBlock(gd.Node(50,50),gd.Node(150,50))
+#world.createWallBlock(gd.Node(50,50),gd.Node(150,50))
 
 #
 
@@ -52,30 +52,34 @@ world.createWallBlock(gd.Node(50,50),gd.Node(150,50))
 # while(world.checkPaths()):
 #     world.updateGraph()
 
+world.obs.append(vr.Block(50,50,50,150,False))
+world.obs.append(vr.Block(200,150,50,100,False))
+for i in range(10):
+    if(world.quadTree()):
+        break
+
+# print("printing results\n")
+# world.print()
 
 
-print("printing results\n")
-world.print()
+# done = False
+# while(not done):
+#     world.combine()
+#     done = True
+#     for i in world.blocks:
+#         if(((i.width*i.height)/(world.width*world.height))<0.01 and i.flyable):
+#             done = False
+# while(world.checkPaths()):
+#     world.updateGraph()
 
+#world.graph.updateWeights(world.blocks[0].node)
+# world.adjustForSize()
+# print("testing for bad paths\n")
+# while(world.checkPaths()):
+#     world.updateGraph()
+# print("final results\n")
 
-done = False
-while(not done):
-    world.combine()
-    done = True
-    for i in world.blocks:
-        if(((i.width*i.height)/(world.width*world.height))<0.01 and i.flyable):
-            done = False
-while(world.checkPaths()):
-    world.updateGraph()
-
-world.graph.updateWeights(world.blocks[0].node)
-world.adjustForSize()
-print("testing for bad paths\n")
-while(world.checkPaths()):
-    world.updateGraph()
-print("final results\n")
-
-world.print()
+#world.print()
 
 
 
@@ -87,6 +91,15 @@ fig2 = plt.figure()
 ax2 = fig2.add_subplot(111, aspect='equal')
 ax2.margins(x=300,y=300)
 for i in world.blocks:
+    ax2.add_patch(
+        patches.Rectangle(
+            (i.x, i.y),
+            i.width,
+            i.height,
+            fill=False if (i.flyable) else True      # remove background
+        ) ) 
+
+for i in world.obs:
     ax2.add_patch(
         patches.Rectangle(
             (i.x, i.y),

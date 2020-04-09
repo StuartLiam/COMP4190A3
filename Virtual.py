@@ -61,6 +61,7 @@ class World(Rectangle):
         self.blocks = [Block(self.x,self.y,self.width,self.height,True)]
         self.drone = VirDrone(x,y,self)
         self.graph = gd.Graph()
+        self.obs = []
         self.goals = goals
         self.currentGoal = goals[0] if (goals != None) else None
 
@@ -275,6 +276,36 @@ class World(Rectangle):
                     found = True
 
         self.updateGraph()
+
+    def quadTree(self):
+        allG = True
+        for i in self.blocks:
+            doTheSplit = False
+            for j in self.obs:
+                iLines = i.getLines()
+                jLines = j.getLines()
+                for k in iLines:
+                    for l in jLines:
+                        if (lh.intersect(k[0],k[1],l[0],l[1])):
+                            allG = False
+                            doTheSplit = True
+                if(
+                    i.inside(j.x,j.y) or
+                    i.inside(j.x,j.y+j.height) or
+                    i.inside(j.x+j.width,j.y) or
+                    i.inside(j.x+j.width,j.y+j.height)
+                    ):
+                    allG = False
+                    doTheSplit = True
+            if(doTheSplit):
+                if(i.width >= i.height):
+                    self.split(i.node.x, i.node.y,VERITCAL,True,True)
+                if(i.width < i.height):
+                    self.split(i.node.x, i.node.y,HORIZONTAL,True,True)
+        return allG
+
+
+
 
     def adjustForSize(self):
         for i in self.blocks:
