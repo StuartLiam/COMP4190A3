@@ -59,7 +59,6 @@ class World(Rectangle):
         # if ( color is not None ):
         #     self.patch = plt.Rectangle((self.x, self.y), self.width, self.height, facecolor=color, edgecolor='#202020')
         self.blocks = [Block(self.x,self.y,self.width,self.height,True)]
-        self.obsticles = []
         self.drone = VirDrone(x,y,self)
         self.graph = gd.Graph()
         self.goals = goals
@@ -126,7 +125,156 @@ class World(Rectangle):
                             if(i.nodeTwo.parent.width < i.nodeTwo.parent.height):
                                 self.split(i.nodeTwo.x, i.nodeTwo.y,HORIZONTAL,True,True)
         return FoundOne
+    
+    def createWallBlock(self,nodeOne, nodeTwo):
+        midX = nodeOne.x + ((nodeTwo.x-nodeOne.x)/2)
+        midY = nodeOne.y + ((nodeTwo.y-nodeTwo.y)/2)
+        safety = 6
 
+        block = Block(0,0,0,0,False)
+
+        if(abs(nodeOne.x-nodeTwo.x)<1):
+            #print("vertical")
+            block = Block(max(0,midX-safety),max(0,nodeOne.y-safety),safety*2,nodeTwo.y-nodeOne.y+(2*safety),False)
+            objLines = block.getLines()
+
+            for i in self.blocks:
+                lines = i.getLines()
+                for k in lines:
+                    if(i.flyable and (
+                        i.inside(block.x,block.y) or
+                        i.inside(block.x,block.y+block.height) or 
+                        i.inside(block.x,block.node.y) or
+                        lh.intersect(objLines[0][0],objLines[0][1],k[0],k[1])
+                        )):
+                        #print("left")
+                        self.split(block.x,i.node.y,VERITCAL,True,True)
+            self.updateGraph()
+
+            for i in self.blocks:
+                lines = i.getLines()
+                for k in lines:
+                    if( i.flyable and (
+                        i.inside(block.x,block.y) or 
+                        i.inside(block.x+block.width,block.y) or 
+                        i.inside(block.node.x,block.y) or
+                        lh.intersect(objLines[1][0],objLines[1][1],k[0],k[1])
+                    )):
+                        #print("Bottom")
+                        self.split(i.node.x,block.y,HORIZONTAL,True,True)
+            self.updateGraph()
+            
+            for i in self.blocks:
+                lines = i.getLines()
+                for k in lines:
+                    if( i.flyable and (
+                        lh.intersect(objLines[2][0],objLines[2][1],k[0],k[1]) or 
+                        i.inside(block.x,block.y+block.height) or 
+                        i.inside(block.x+block.width,block.y+block.height) or
+                        i.inside(block.node.x,block.y+block.height)
+                    )):
+                        #print("Top")
+                        self.split(i.node.x,block.y+block.height,HORIZONTAL,True,True)
+            self.updateGraph()
+            
+            for i in self.blocks:
+                lines = i.getLines()            
+                for k in lines:
+                    if( i.flyable and (
+                        lh.intersect(objLines[3][0],objLines[3][1],k[0],k[1]) or 
+                        i.inside(block.x+block.width,block.y) or
+                        i.inside(block.x+block.width,block.y+block.height) or
+                        i.inside(block.x+block.width,block.node.y)
+                    )):
+                        #print("right")
+                        self.split(block.x+block.width,i.node.y,VERITCAL,True,True)
+            self.updateGraph()
+
+            for i in self.blocks:
+                if(i.inside(block.node.x,block.node.y)):
+                    i.flyable = False
+
+        else:
+            #print("horizontal")
+            block = Block(max(0,nodeOne.x-safety),max(0,midY-safety),nodeTwo.x-nodeOne.x+(2*safety),2*safety,False)
+            objLines = block.getLines()
+
+        #horizontal
+
+            for i in self.blocks:
+                #print("hold")
+                lines = i.getLines()
+                for k in lines:
+                    if( i.flyable and (
+                        i.inside(block.x,block.y) or 
+                        i.inside(block.x+block.width,block.y) or 
+                        i.inside(block.node.x,block.y) or
+                        lh.intersect(objLines[1][0],objLines[1][1],k[0],k[1])
+                    )):
+                        #print("Bottom")
+                        self.split(i.node.x,block.y,HORIZONTAL,True,True)
+            self.updateGraph()
+            
+            for i in self.blocks:
+                lines = i.getLines()
+                for k in lines:
+                    if( i.flyable and (
+                        i.inside(block.x,block.y) or
+                        i.inside(block.x,block.y+block.height) or 
+                        i.inside(block.x,block.node.y) or
+                        lh.intersect(objLines[0][0],objLines[0][1],k[0],k[1])
+                    )):
+                        #print("left")
+                        self.split(block.x,i.node.y,VERITCAL,True,True)
+            self.updateGraph()
+
+            
+            for i in self.blocks:
+                lines = i.getLines()            
+                for k in lines:
+                    if( i.flyable and (
+                        lh.intersect(objLines[3][0],objLines[3][1],k[0],k[1]) or 
+                        i.inside(block.x+block.width,block.y) or
+                        i.inside(block.x+block.width,block.y+block.height) or
+                        i.inside(block.x+block.width,block.node.y)
+                    )):
+                        #print("right")
+                        self.split(block.x+block.width,i.node.y,VERITCAL,True,True)
+            self.updateGraph()
+
+            for i in self.blocks:
+                lines = i.getLines()
+                for k in lines:
+                    if( i.flyable and (
+                        #lh.intersect(objLines[2][0],objLines[2][1],k[0],k[1]) or 
+                        i.inside(block.x,block.y+block.height) or 
+                        i.inside(block.x+block.width,block.y+block.height) or
+                        i.inside(block.node.x,block.y+block.height)
+                    )):
+                        #print("Top")
+                        self.split(i.node.x,block.y+block.height,HORIZONTAL,True,True)
+            self.updateGraph()
+
+            for i in self.blocks:
+                if(i.inside(block.node.x,block.node.y)):
+                    i.flyable = False
+
+    def combine(self):
+        # found = True
+        # while(found):
+        found = False
+        for i in self.blocks:
+            for j in self.blocks:
+                if(i.y == j.y and i.height == j.height and i.x+i.width == j.x and j.flyable and i.flyable):
+                    i.width = i.width + j.width
+                    self.blocks.remove(j)
+                    found = True
+                elif(i.x == j.x and i.width == j.width and i.y+i.height == j.y and j.flyable and i.flyable):
+                    i.height = i.height + j.height
+                    self.blocks.remove(j)
+                    found = True
+
+        self.updateGraph()
 
     def adjustForSize(self):
         for i in self.blocks:
